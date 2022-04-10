@@ -293,11 +293,11 @@ IN_SAMPLE <- IN_sampleacc %>%
   select(c(".model", ".type", "MAPE")) %>%
   kable(format = "html", table.attr = "sytle='widtth:30%$;' ") %>% 
   kableExtra::kable_styling()
-```
 
-```{r Calling In_Sample Table, message=FALSE}
 IN_SAMPLE
 ```
+
+
 
 The next table below reports the Out-of-Sample MAPE for each of our models as well as the ensemble model.\
 We see that for our forecasting, the models containing Industry Production metrics performed the best.\
@@ -311,11 +311,9 @@ OUT_SAMPLE <- OUT_sampleacc %>%
   select(c(".model", ".type", "MAPE")) %>%
   kable(format = "html", table.attr = "sytle='widtth:30%$;' ") %>% 
   kableExtra::kable_styling()
-```
-```{r Calling Out_Sample Table, message=FALSE}
 OUT_SAMPLE
-  
 ```
+
 
 ## Forecasts of all Models
 ```{r Actual Plot of Forecast}
