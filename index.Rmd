@@ -1,0 +1,351 @@
+---
+title: 'Forecasting US Inflation (1 year)'
+author: "William Stevenson"
+date: "04-10-2022"
+output:
+  html_document:
+    code_folding: hide
+    df_print: paged
+    fig_caption: yes
+    theme: sandstone
+    toc: yes
+    toc_depth: 4
+    toc_float: no
+  pdf_document:
+    toc: yes
+---
+$~$
+
+
+## Abstract
+\
+Forecasting "U.S." Inflation has taken many forms over the years. From the purely theoretical formulations\
+to massively complex models utilizing hundreds of variables to try and eek out that extra sliver of accuracy.\
+This paper evaluates the accuracy of a multiple forecasts using a multitude of variables\
+and an ensemble model to see if any of them outperform traditional specifications. What was\
+found was that the model consisting of past observations of inflation and measures of Industry Production\
+performed slightly better than the other models.This was the case in both the in-sample and out-of-sample\
+accuracy measures.
+
+
+## Introduction
+\
+Inflation is one of the trickiest things in economics and business to pin down. How inflation moves year to year,\
+or even quarter to quarter, is a factor of so many economic forces from nominal output of goods and the nominal\
+amount of money in the economy to unemployment rate and expectations of future inflation. How inflation moves and\
+by how much is also of concern to practically everyone who participates in the economy. Businesses need to know\
+how prices move to keep on top of profits. Citizens need to be able to plan for how much value their savings will\
+have in the future.\
+Traditional forecasts have either stuck to legacy specifications of the Phillips Curve that utilize unemployment\
+rate and lags of inflation. Other forecasts have gone the other direction and included hundreds of variables to try\
+and improve forecasts accuracy. This paper attempts to find a better model for forecasting "U.S" inflation\
+using the traditional model specification for the Phillips Curve while slotting in different variables for\
+unemployment.\
+In the next section, the paper will dive into data collection methodology and data mutation.\
+\
+
+## Data Collection and Mutation
+\
+To aid in these quest's for information, economist and forecasters have been creating models to estimate what\
+inflation in future periods will be based on other variables. The data used to build these models was\
+pulled from the Federal Reserve's Economic Data (F.R.E.D) database. The first variable retrived was Personal Consumption Expenditures (Price index reported monthly and seasonally adjusted by Bureau of Economic Analysis).\
+This metric is the preferred measure for inflation by the Federal Reserve. For this reason we will be using\
+it as our measure for calculating inflation and our lagged variables of inflation for all of our models.\
+In order to convert the data from an Index to percentage change, it was required to take PCEPI and divide it by\
+the lag of PCEPI, take the natural log of that, and multiply that number by 1200.\
+\
+
+The next variable that was utilized was the Unemployment rate gathered from FRED (UNRATE). This data set is provided\
+by the Bureau of Labor Statistics and is reported monthly and already seasonally adjusted.(Series officially from\
+'Current Population Survey'). This data is gathered from all 50 states and the District of Columbia, restricting\
+observations to persons 16 years or older. This data set was already provided in a percent format, so to mutate\
+the data into percentage of change of Unemployment rate was as simple as subtracting each observation from its\
+lag.\
+\
+The next variable required in our analysis is the Capacity Utilization: Total Index (TCU) from FRED. This data\
+is produced by the Board of Governors of the Federal Reserve System and is reported monthly and already\
+seasonally adjusted. Capacity Utilization in essence measures the percent of total resources utilized by\
+corporations and factories to produce goods. This metric is created for 89 different industries, however this\
+metric in particular is taking into account all of them. Similar to Unemployment rate, our data is already in\
+percent form so to mutate them to percentage change is easy enough. Simply subtract each observation from its\
+lag and it is all ready.\
+\
+Next we fetch the Industrial Production Index (INDPRO) from FRED. This metric is also reported by the Board\
+of Governors of the Federal Reserve System and is reported monthly, seasonally adjusted and in an index.\
+For this reason, we mutate our data by dividing each observation by its lag, taking the natural log of that\
+and multiplying by 1200. This will result in percentage changes from each observation to the next.\
+\
+Next, we need to grab is the Industrial Production Index for Manufacturing from FRED. (IPMAN)\
+This data set has been created by the Board of Governors of the Federal Reserve System and is reported monthly,\
+seasonally adjusted and in an index. To mutate our data into percentage changes, we simply have to divide each\
+observation by its lag, take the log, and multiply by 1200.\
+\
+Finally, we create our variable for our estimation of inflation one-year ahead. This will end up being the\
+variable that we run our regression/forecasts on where $dinfl12 = (\pi^{12}_t - \pi_{t-12})$ where\
+$\pi^{12}_t$ is the summation of 12 ordered lags divided by their previous lagged observation. More formally as:\
+\[ \pi^{12}_t = \phi + \beta(B)\Delta_{\pi_{t-12}} + \gamma(B)_{u_{t-12}} + \pi_{t-12} + \varepsilon_t \]
+where $\beta(B)$ and $\gamma(B)$ are our order of lag polynomials which we have decided to be 12.\
+As we start from $t-12$, all of our lags start off at $t-12$ and go backwards to $t-23$. In essence, we are\
+going to end up predicting what current inflation should look like today using data on inflation from last year\
+so that we can train our model in-sample with available data. This fitting will then be extrapolated past our\
+available data set to provide an actual one-year forecast for "U.S" Inflation. 
+\
+
+## Reasons for Variable Choice and Transformations
+\
+The first of our variables (PCEPI) was selected to get a measure for inflation. Inflation after all is the\
+is the overall measure of how the purchasing power of of money changes over time. Generally, as inflation rises\
+each dollar as less purchasing power and therefore, prices will increase. PCEPI measures how the price of household\
+goods and services changes. We can obtain inflation by dividing each observation by its previous observation,\
+taking the log and multiply by 1200.\
+\
+Next, the purpose of this analysis is to see if improvements can be made on using the Phillips Curve using variables\
+other than unemployment. Naturally, we need to estimate the Phillips Curve using Unemployment to have an estimation\
+that we can try to beat. Also makes sense to include in our ensemble model as unemployment theoretically influences\
+inflation very heavily. During times of low unemployment, demand for labor exceeds the supply of it. Employers\
+will have to bid up wages to attract employees; forcing the cost of inputs to go up and by extension, the price of\
+the downstream product or service. This will propagate into lower demand for these products and services, eventually\
+putting pressure on firms to lower prices later. The opposite occurs when unemployment is high. Those searching for\
+work will not accept less than a reasonable market wage and ever so slowly, prices fall.\
+\
+This is how the Phillips Curve substantiation goes and for a long time, was widely accepted. But can we do better?\
+\
+First step back and think, what exactly determines the purchasing power of currency? Most economist would agree that\
+it is based on the nominal amount of goods in an economy and the nominal amount of money supply in an economy.\
+Generally, when you increase the amount of actual money floating around in an economy, but do not change the actual\
+amount of goods in that economy, the purchasing power of each of those units of currency falls (too much money\
+chasing too few goods). So, it would make sense to bring in some measures for how to production of goods/services\
+has been changing over time to forecast how inflation has been changing over time.\
+\
+For these reasons, the measures of output capability of the economy should be useful in predicting inflation\
+with our forecasts. If the production of goods and services is growing, it is likely that the demand for these\
+goods and services is growiing as well and putting upwards pressure on inflation. On the other hand, if production\
+of goods and services are falling, it is likely that the demand for these goods and services is falling, putting\
+downwards pressure on inflation.\
+Next, we move on to discuss model specification.\
+\
+
+
+## Formulation of Model
+\
+The first model that is estimated is the classic Phillips curve using the specification:
+\[ \pi^{12}_t - \pi_{t-12} = \phi + \beta(B)\Delta_{\pi_{t-12}} + \gamma(B)_{u_{t-12}} + \varepsilon_t \]
+where $\pi^{12}_t = 100ln(P_t/P_{t-12})$, $\pi_{t-12} = 1200ln(P_{t-12}/P_{t-13})$, $P_t$ is the price level\
+measured by our variable PCEPI, $u_t$ is the annualized unemployment rate measured by our variable UNRATE.\
+$\beta(B)$ and $\gamma(B)$ are our order of lag polynomials which we have decided to be 12.\
+The reason for this being that while at steady-state, with all shocks equaling zero and with all other variables\
+converging on some equilibrium value, the 1-year ahead forecast for the inflation rate is:
+\[ \lim_{t\to\infty} \pi^{12}_t = 12\overline{\pi} = \phi + \overline{\pi} + \gamma(1)\overline{u}  \]
+where $\overline{\pi}$ and $\overline{u}$ are the steady-state level of inflation and unemployment rate. 
+\
+To see why this is useful, let us rewrite the model as:
+
+\[ \pi^{12}_t = \phi + \pi_{t-12} + \sum_{i=0}^{11}\beta_i(\pi_{t-12-i}-\pi_{t-12-1-i}) + \gamma(B)u_{t-12} + \varepsilon_t \]
+ with $\beta(B)$ and $\gamma(B)$ are the $12^{th}$-order polynomials in the lag operator $B$.\
+ \
+ This can be rewritten as:
+ 
+ \[\pi^{12}_t = \phi + (1 + \beta_0)\pi_{t-12} + (\beta_1 - \beta_0)\pi_{t-13} + (\beta_2 - \beta_1)\pi_{t-14}...+ (\beta_{11}-\beta_{10})\pi_{t-23} - \beta_{11}\pi_{t-24} + \gamma(B)u_{t-24} + \varepsilon_t\] \
+ \
+ and then further reduced to:
+ \
+ \[\pi^{12}_t = (\mu_o + \mu_1B + \mu_2B^2 + \mu_3B^3 + \mu_4B^4... + \mu_{12}B^{12})\pi_{t-12} + \gamma(B)u_{t-12} + \varepsilon_t \]
+ \
+ where $\mu_0 = 1 + \beta_0$, $\mu_1 = \beta_1 = \beta_0$...
+ \
+ Take note that $\mu(B = 1)$ equates to $\sum^{12}_{i=0}\mu_i = 1$. As a result, in a steady-state where\
+ $\varepsilon_t$ = 0 and $\pi_t = \overline{\pi}$ and $u_t = \overline{u}$ for all values of $t$, we can write:
+ 
+ \[\lim_{t\to\infty} \pi^{12}_t = \phi + \overline{\pi} + \gamma^*\overline{u}  \] where $\gamma^* = \sum^{12}_{i=0}\gamma_i$
+ \
+ From this we deduce that the long-run relationship between inflation and the 'natural' rate of unemployment\
+ can be written as: $\overline{\pi} = \phi + \overline{\pi} + \gamma^*\overline{u}$. This implies that the\
+ natural rate of unemployment should be constant at $\overline{u} = -\phi/\gamma^*$\
+ \
+ In conclusion, economic theory suggest that at a steady state of 'natural' rate of unemployment should produce\
+ a natural steady state rate of inflation. This explains our model specification.\
+ \
+ The models in this analysis simply slot in other variables for unemployment rate in this specification. The variable\
+ that is slotted in for unemployment rate is denoted by the name of the name of the model. In addition to these\
+ models, an ensemble model was included which averaged all four of the other models linearly.
+
+ 
+ 
+```{r Ya Mum, warning= FALSE, message=FALSE, error=FALSE, include=FALSE}
+
+setwd("C:/Users/William/Desktop/AOE_Project")
+D <- read.csv(file = "AOE_Project.csv", stringsAsFactors = FALSE, header = TRUE)
+require(tidyverse)
+require(kableExtra)
+require(tidyquant)
+require(tsibble)
+require(ggplot2)
+require(reshape2)
+require(fpp3)
+```
+
+```{r Soft Data Manipulation, include=FALSE, message=FALSE}
+D1 <- D[757:1239,]
+
+D2 <- D1 %>%
+  mutate(Month = yearmonth(D1$ï..DATE))
+
+D2 <- D2 %>% 
+  as_tsibble(index = Month)
+```
+
+
+```{r Data Manipulation, include=FALSE, message=FALSE}
+MODEL <- D2 %>% select(c(PCEPI, UNRATE, TCU, INDPRO, IPMAN, Month)) %>%
+  mutate(infl = 1200*log(PCEPI/lag(PCEPI))) %>% 
+  mutate(dinfl = infl - lag(infl,1)) %>% 
+  mutate(dinfl12 = 100*log(PCEPI/lag(PCEPI,12)) - lag(infl,12)) %>% 
+  mutate(unrate = UNRATE - lag(UNRATE)) %>% 
+  mutate(tcu = TCU - lag(TCU)) %>% 
+  mutate(indpro = 1200*log(INDPRO/lag(INDPRO))) %>% 
+  mutate(ipman = 1200*log(IPMAN/lag(IPMAN))) %>% 
+  drop_na()
+
+BadVEC <- c("PCEPI", "UNRATE", "TCU", "INDPRO", "IPMAN", "ï..DATE")
+MODEL = MODEL[,!(names(MODEL) %in% BadVEC)]
+
+
+
+train_data <- MODEL %>% filter_index(~ "2019-12-01")
+test_data <- MODEL %>% filter_index("2020-01-01" ~ .)
+
+```
+
+```{r Dont output slut, include=FALSE, message=FALSE, warning=FALSE}
+MODELMELT <- melt(MODEL, "Month")
+
+ggplot(MODELMELT, aes(Month, value )) + 
+  geom_line() + 
+  facet_wrap(~variable, scales = "free", ncol = 2)
+```
+
+```{r Defining Models, include=FALSE, message=FALSE}
+
+FIT <- train_data %>% 
+  model(
+    mUR = TSLM(dinfl12 ~ 1 +
+                 lag(dinfl,12) + lag(dinfl,13) + lag(dinfl,14) +
+                 lag(dinfl,15) + lag(dinfl,16) + lag(dinfl,17) +
+                 lag(dinfl,18) + lag(dinfl,19) + lag(dinfl,20) +
+                 lag(dinfl,21) + lag(dinfl,22) + lag(dinfl,23) +
+                 lag(unrate,12) + lag(unrate,13) + lag(unrate,14) +
+                 lag(unrate,15) + lag(unrate,16) + lag(unrate,17) +
+                 lag(unrate,18) + lag(unrate,19) + lag(unrate,20) +
+                 lag(unrate,21) + lag(unrate,22) + lag(unrate,23)),
+    
+    mTCU = TSLM(dinfl12 ~ 1 +
+                  lag(dinfl,12) + lag(dinfl,13) + lag(dinfl,14) +
+                  lag(dinfl,15) + lag(dinfl,16) + lag(dinfl,17) +
+                  lag(dinfl,18) + lag(dinfl,19) + lag(dinfl,20) +
+                  lag(dinfl,21) + lag(dinfl,22) + lag(dinfl,23) +
+                  lag(tcu,12) + lag(tcu,13) + lag(tcu,14) + lag(tcu,15) +
+                  lag(tcu,16) + lag(tcu,17) + lag(tcu,18) + lag(tcu,19) +
+                  lag(tcu,20) + lag(tcu,21) + lag(tcu,22) + lag(tcu,23)),
+    
+    mINDPRO = TSLM(dinfl12 ~ 1 +
+                     lag(dinfl,12) + lag(dinfl,13) + lag(dinfl,14) +
+                     lag(dinfl,15) + lag(dinfl,16) + lag(dinfl,17) +
+                     lag(dinfl,18) + lag(dinfl,19) + lag(dinfl,20) +
+                     lag(dinfl,21) + lag(dinfl,22) + lag(dinfl,23) +
+                     lag(indpro,12) + lag(indpro,13) + lag(indpro,14) + lag(tcu,15) +
+                     lag(indpro,16) + lag(indpro,17) + lag(indpro,18) + lag(indpro,19) +
+                     lag(indpro,20) + lag(indpro,21) + lag(indpro,22) + lag(indpro,23)),
+    mIPMAN = TSLM(dinfl12 ~ 1 +
+                    lag(dinfl,12) + lag(dinfl,13) + lag(dinfl,14) +
+                    lag(dinfl,15) + lag(dinfl,16) + lag(dinfl,17) +
+                    lag(dinfl,18) + lag(dinfl,19) + lag(dinfl,20) +
+                    lag(dinfl,21) + lag(dinfl,22) + lag(dinfl,23) +
+                    lag(ipman,12) + lag(ipman,13)+ lag(ipman,14) + lag(ipman,15) +
+                    lag(ipman,16) + lag(ipman,17) + lag(ipman,18) + lag(ipman,19) +
+                    lag(ipman,20) + lag(ipman, 21) + lag(ipman,22) + lag(ipman,23)),
+  )
+tidy(FIT)
+```
+
+```{r Accuracy Test, include=FALSE, message=FALSE}
+FITALL <- FIT %>% mutate(Ensemble = (mUR + mTCU + mINDPRO + mIPMAN)/4)
+
+IN_sampleacc <- accuracy(FITALL)
+
+
+FC_ALL <- FITALL %>% forecast(new_data = test_data)
+
+
+OUT_sampleacc <- accuracy(FC_ALL, MODEL)
+```
+## Results of Forecast
+The table below reports the In-Sample Marginal Absolute Percentage Standard Errors (MAPE) of each of our models\
+as we all the ensemble model. MAPE is defined as $MAPE = 100/n \sum^n_{t=1}|(A_t - F_t)/A_t|$ where $A_t$ is the\
+actual value in our data and $F_t$ is the forecast value. This is a nice measure of accuracy as it is a ratio\
+depending on the actual value in our data. The absolute value of this ratio is used so that all the error can be\
+cumulative and not have negative errors offset positive errors. We can see from our table that for In-Sample\
+accuracy, our model utilizing lagged inflation as well as the Industry Production variable produced the lowest\
+MAPE. That being said, all of our models do not fit our data very well and only marginally improve on each other.\
+It should be noted that all four of our models produced a lower MAPE than the original Phillips Curve\
+specification.
+```{r Training Output, include=FALSE, message=FALSE}
+IN_SAMPLE <- IN_sampleacc %>% 
+  select(c(".model", ".type", "MAPE")) %>%
+  kable(format = "html", table.attr = "sytle='widtth:30%$;' ") %>% 
+  kableExtra::kable_styling()
+```
+
+```{r Calling In_Sample Table, message=FALSE}
+IN_SAMPLE
+```
+
+The next table below reports the Out-of-Sample MAPE for each of our models as well as the ensemble model.\
+We see that for our forecasting, the models containing Industry Production metrics performed the best.\
+For out-of-sample forecasting, it seems that any one of our models outperforms the original Phillips Curve\
+specification by significant margin. This makes sense as including metrics in our models that integrate\
+measures of the state of goods production in the economy should lend a hand in predicting when the purchasing\
+power of the currency is going to be growing or shrinking. 
+
+```{r Test Output, include=FALSE, message=FALSE}
+OUT_SAMPLE <- OUT_sampleacc %>% 
+  select(c(".model", ".type", "MAPE")) %>%
+  kable(format = "html", table.attr = "sytle='widtth:30%$;' ") %>% 
+  kableExtra::kable_styling()
+```
+```{r Calling Out_Sample Table, message=FALSE}
+OUT_SAMPLE
+  
+```
+
+## Forecasts of all Models
+```{r Actual Plot of Forecast}
+FC_ALL %>% autoplot(filter(MODEL, year(Month) > 2016), level = c(95))
+```
+\
+
+## Conclusion
+Inflation is dependent on so many variables in an economy that any simple specification could never fully encapsulate\
+or predict the variability of inflation. The Phillips Curve has served the field of economics well for the past 60\
+years in defining the relationship between inflation and unemployment, however we can see from our forecast accuracy\
+measures and our plot that the original specification does the worst at forecasting inflation. Models utilizing\
+measures of industry production level or capacity (TCU, IPMAN) performed the best (low accuracy statistics).\
+It should be noted that while we did imporve upon the original model, all of the models considered in this\
+analysis performed relatively poorly. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
