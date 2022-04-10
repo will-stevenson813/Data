@@ -314,7 +314,7 @@ of goods and services are falling, it is likely that the demand for these goods 
 downwards pressure on inflation.<br />
 Next, we move on to discuss model specification.<br />
 <br />
-</p>
+To see the entire code and html file, follow this link. <a href="https://will-stevenson813.github.io">link</a></p>
 </div>
 <div id="formulation-of-model" class="section level2">
 <h2>Formulation of Model</h2>
@@ -358,158 +358,12 @@ accuracy, our model utilizing lagged inflation as well as the Industry Productio
 MAPE. That being said, all of our models do not fit our data very well and only marginally improve on each other.<br />
 It should be noted that all four of our models produced a lower MAPE than the original Phillips Curve<br />
 specification.</p>
-<pre class="r"><code>IN_SAMPLE</code></pre>
-<table sytle="widtth:30%$;" class="table" style="margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:left;">
-.model
-</th>
-<th style="text-align:left;">
-.type
-</th>
-<th style="text-align:right;">
-MAPE
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-mUR
-</td>
-<td style="text-align:left;">
-Training
-</td>
-<td style="text-align:right;">
-194.3407
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-mTCU
-</td>
-<td style="text-align:left;">
-Training
-</td>
-<td style="text-align:right;">
-184.0923
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-mINDPRO
-</td>
-<td style="text-align:left;">
-Training
-</td>
-<td style="text-align:right;">
-181.5263
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-mIPMAN
-</td>
-<td style="text-align:left;">
-Training
-</td>
-<td style="text-align:right;">
-182.3537
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Ensemble
-</td>
-<td style="text-align:left;">
-Training
-</td>
-<td style="text-align:right;">
-184.7423
-</td>
-</tr>
-</tbody>
-</table>
 <p>The next table below reports the Out-of-Sample MAPE for each of our models as well as the ensemble model.<br />
 We see that for our forecasting, the models containing Industry Production metrics performed the best.<br />
 For out-of-sample forecasting, it seems that any one of our models outperforms the original Phillips Curve<br />
 specification by significant margin. This makes sense as including metrics in our models that integrate<br />
 measures of the state of goods production in the economy should lend a hand in predicting when the purchasing<br />
 power of the currency is going to be growing or shrinking.</p>
-<pre class="r"><code>OUT_SAMPLE</code></pre>
-<table sytle="widtth:30%$;" class="table" style="margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:left;">
-.model
-</th>
-<th style="text-align:left;">
-.type
-</th>
-<th style="text-align:right;">
-MAPE
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-Ensemble
-</td>
-<td style="text-align:left;">
-Test
-</td>
-<td style="text-align:right;">
-112.6873
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-mINDPRO
-</td>
-<td style="text-align:left;">
-Test
-</td>
-<td style="text-align:right;">
-102.3349
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-mIPMAN
-</td>
-<td style="text-align:left;">
-Test
-</td>
-<td style="text-align:right;">
-107.7856
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-mTCU
-</td>
-<td style="text-align:left;">
-Test
-</td>
-<td style="text-align:right;">
-102.5024
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-mUR
-</td>
-<td style="text-align:left;">
-Test
-</td>
-<td style="text-align:right;">
-172.5794
-</td>
-</tr>
-</tbody>
-</table>
 </div>
 <div id="forecasts-of-all-models" class="section level2">
 <h2>Forecasts of all Models</h2>
