@@ -124,6 +124,8 @@ of goods and services are falling, it is likely that the demand for these goods 
 downwards pressure on inflation.\
 Next, we move on to discuss model specification.\
 \
+To see the entire code and html file, follow this link.
+[link](https://will-stevenson813.github.io)
 
 
 ## Formulation of Model
